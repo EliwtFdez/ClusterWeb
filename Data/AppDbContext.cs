@@ -18,12 +18,12 @@ namespace ClusterWeb.Data
             // Índice en la dirección de la casa
             modelBuilder.Entity<Casa>()
                 .HasIndex(c => c.Direccion)
-                .HasName("idx_direccion"); // Usar HasDatabaseName para definir el nombre del índice en la base de datos
+                .HasDatabaseName("idx_direccion"); // Usar HasDatabaseName para definir el nombre del índice en la base de datos
 
             // Índice en el nombre del residente
             modelBuilder.Entity<Residente>()
                 .HasIndex(r => r.Nombre)
-                .HasName("idx_nombre"); // Usar HasDatabaseName para definir el nombre del índice en la base de datos
+                .HasDatabaseName("idx_nombre"); // Usar HasDatabaseName para definir el nombre del índice en la base de datos
 
             // Valor por defecto en FechaRegistro
             modelBuilder.Entity<Casa>()
