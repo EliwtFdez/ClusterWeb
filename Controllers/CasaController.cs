@@ -20,6 +20,7 @@ namespace ClusterWeb.Controllers
         /// <summary>
         /// Obtiene todas las casas registradas.
         /// </summary>
+       
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Casa>>> GetCasas()
         {
@@ -29,6 +30,7 @@ namespace ClusterWeb.Controllers
         /// <summary>
         /// Obtiene una casa por su ID.
         /// </summary>
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Casa>> GetCasa(int id)
         {
@@ -45,6 +47,7 @@ namespace ClusterWeb.Controllers
         /// <summary>
         /// Crea una nueva casa.
         /// </summary>
+
         [HttpPost]
         public async Task<ActionResult<Casa>> CreateCasa([FromBody] CasaCreateDto casaDto)
         {
@@ -69,11 +72,20 @@ namespace ClusterWeb.Controllers
         /// <summary>
         /// Actualiza los datos de una casa.
         /// </summary>
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCasa(int id, [FromBody] Casa casa)
+        public async Task<IActionResult> UpdateCasa(int id, [FromBody] CasaUpdateDto casaDto)
         {
-            if (id != casa.CasaId)
-                return BadRequest(new { mensaje = "El ID no coincide" });
+            var casa = await _context.Casas.FindAsync(id);
+            
+            if (casa == null)
+                return NotFound(new { mensaje = "Casa no encontrada" });
+
+            // Actualizar solo los campos necesarios
+            casa.Direccion = casaDto.Direccion;
+            casa.NumeroCasa = casaDto.NumeroCasa;
+            casa.Habitaciones = casaDto.Habitaciones;
+            casa.Banos = casaDto.Banos;
 
             _context.Entry(casa).State = EntityState.Modified;
 
@@ -83,14 +95,12 @@ namespace ClusterWeb.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Casas.Any(e => e.CasaId == id))
-                    return NotFound(new { mensaje = "Casa no encontrada" });
-
-                throw;
+                return StatusCode(500, new { mensaje = "Error al actualizar la casa" });
             }
 
-            return NoContent();
+            return NoContent(); // Respuesta estándar de actualización exitosa sin contenido
         }
+
 
         /// <summary>
         /// Elimina una casa por su ID.
