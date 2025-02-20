@@ -21,7 +21,7 @@ namespace ClusterWeb.Controllers
         /// Obtiene todas las casas registradas.
         /// </summary>
        
-        [HttpGet]
+         [HttpGet]
         public async Task<ActionResult<IEnumerable<Casa>>> GetCasas()
         {
             return await _context.Casas.Include(c => c.Residentes).ToListAsync();
@@ -74,7 +74,7 @@ namespace ClusterWeb.Controllers
         /// </summary>
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCasa(int id, [FromBody] CasaUpdateDto casaDto)
+        public async Task<IActionResult> UpdateCasa(int id, [FromBody] CasaCreateDto casaDto)
         {
             var casa = await _context.Casas.FindAsync(id);
             
