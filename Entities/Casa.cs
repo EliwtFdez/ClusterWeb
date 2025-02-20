@@ -10,7 +10,9 @@ namespace ClusterWeb.Entities
         public DateTime FechaRegistro { get; set; } = DateTime.Now;
 
         // Relación con Residentes
-        public ICollection<Residente> Residentes { get; set; }
-        public ICollection<Deuda> Deudas { get; set; }
+        public ICollection<Residente> Residentes { get; set; } = new List<Residente>();
+        public ICollection<Deuda> Deudas { get; set; }  = new List<Deuda>();
     }
+
+
 }

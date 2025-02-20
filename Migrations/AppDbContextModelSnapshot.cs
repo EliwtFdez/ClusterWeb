@@ -70,13 +70,14 @@ namespace ClusterWeb.Migrations
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Estado")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("pendiente");
+                        .HasDefaultValue("Pendiente");
 
                     b.Property<DateTime>("FechaRegistro")
                         .ValueGeneratedOnAdd()
@@ -116,7 +117,9 @@ namespace ClusterWeb.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("FechaPago")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("MetodoPago")
                         .IsRequired()
@@ -162,7 +165,8 @@ namespace ClusterWeb.Migrations
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Telefono")
                         .IsRequired()
@@ -183,7 +187,7 @@ namespace ClusterWeb.Migrations
                     b.HasOne("ClusterWeb.Entities.Casa", "Casa")
                         .WithMany("Deudas")
                         .HasForeignKey("CasaId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ClusterWeb.Entities.Residente", "Residente")
@@ -208,7 +212,7 @@ namespace ClusterWeb.Migrations
                     b.HasOne("ClusterWeb.Entities.Residente", "Residente")
                         .WithMany("Pagos")
                         .HasForeignKey("ResidenteId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Deuda");

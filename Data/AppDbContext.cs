@@ -14,7 +14,7 @@ namespace ClusterWeb.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Índices
+            // 🔹 Índices
             modelBuilder.Entity<Casa>()
                 .HasIndex(c => c.Direccion)
                 .HasDatabaseName("idx_direccion");
@@ -23,7 +23,7 @@ namespace ClusterWeb.Data
                 .HasIndex(r => r.Nombre)
                 .HasDatabaseName("idx_nombre");
 
-            // Valores por defecto
+            // 🔹 Valores por defecto
             modelBuilder.Entity<Casa>()
                 .Property(c => c.FechaRegistro)
                 .HasDefaultValueSql("GETDATE()");
@@ -36,12 +36,21 @@ namespace ClusterWeb.Data
                 .Property(d => d.FechaRegistro)
                 .HasDefaultValueSql("GETDATE()");
 
+            modelBuilder.Entity<Pago>()
+                .Property(p => p.FechaPago)
+                .HasDefaultValueSql("GETDATE()");
+
+            // 🔹 Conversión de enums
             modelBuilder.Entity<Deuda>()
                 .Property(d => d.Estado)
-                .HasDefaultValue("pendiente")
+                .HasDefaultValue(EstadoDeuda.Pendiente)
                 .HasConversion<string>();
 
-            // Relaciones y claves foráneas
+            modelBuilder.Entity<Pago>()
+                .Property(p => p.MetodoPago)
+                .HasConversion<string>();
+
+            // 🔹 Relaciones y claves foráneas
             modelBuilder.Entity<Residente>()
                 .HasOne(r => r.Casa)
                 .WithMany(c => c.Residentes)
@@ -52,13 +61,27 @@ namespace ClusterWeb.Data
                 .HasOne(d => d.Casa)
                 .WithMany(c => c.Deudas)
                 .HasForeignKey(d => d.CasaId)
-                .OnDelete(DeleteBehavior.NoAction); // Evita múltiples cascadas
+                .OnDelete(DeleteBehavior.Restrict); // Evita cascada de eliminación
+
+            modelBuilder.Entity<Deuda>()
+                .HasOne(d => d.Residente)
+                .WithMany(r => r.Deudas)
+                .HasForeignKey(d => d.ResidenteId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Pago>()
                 .HasOne(p => p.Residente)
                 .WithMany(r => r.Pagos)
                 .HasForeignKey(p => p.ResidenteId)
-                .OnDelete(DeleteBehavior.NoAction); // Evita ciclos de cascada
+                .OnDelete(DeleteBehavior.Restrict); 
+
+            modelBuilder.Entity<Pago>()
+                .HasOne(p => p.Deuda)
+                .WithMany()
+                .HasForeignKey(p => p.DeudaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
         }
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ClusterWeb.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class FixCascadingDelete : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,7 +34,7 @@ namespace ClusterWeb.Migrations
                 {
                     ResidenteId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Telefono = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FechaIngreso = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -63,8 +63,8 @@ namespace ClusterWeb.Migrations
                     Monto = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     SaldoPendiente = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     FechaVencimiento = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Estado = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: "pendiente"),
-                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Estado = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: "Pendiente"),
+                    Descripcion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
                 },
                 constraints: table =>
@@ -74,7 +74,8 @@ namespace ClusterWeb.Migrations
                         name: "FK_Deudas_Casas_CasaId",
                         column: x => x.CasaId,
                         principalTable: "Casas",
-                        principalColumn: "CasaId");
+                        principalColumn: "CasaId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Deudas_Residentes_ResidenteId",
                         column: x => x.ResidenteId,
@@ -92,7 +93,7 @@ namespace ClusterWeb.Migrations
                     DeudaId = table.Column<int>(type: "int", nullable: false),
                     ResidenteId = table.Column<int>(type: "int", nullable: false),
                     MontoPagado = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    FechaPago = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FechaPago = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
                     MetodoPago = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -108,7 +109,8 @@ namespace ClusterWeb.Migrations
                         name: "FK_Pagos_Residentes_ResidenteId",
                         column: x => x.ResidenteId,
                         principalTable: "Residentes",
-                        principalColumn: "ResidenteId");
+                        principalColumn: "ResidenteId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
