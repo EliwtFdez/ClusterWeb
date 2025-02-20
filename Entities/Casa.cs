@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace ClusterWeb.Entities
 {
     public class Casa
