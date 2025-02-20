@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35005.142
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClusterWeb", "ClusterWeb.csproj", "{3AE57F80-E9AA-4E03-8CC9-C6D7870228CB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3AE57F80-E9AA-4E03-8CC9-C6D7870228CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AE57F80-E9AA-4E03-8CC9-C6D7870228CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AE57F80-E9AA-4E03-8CC9-C6D7870228CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AE57F80-E9AA-4E03-8CC9-C6D7870228CB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F853B771-F96C-40CB-8E25-1D68EBA82059}
+	EndGlobalSection
+EndGlobal
