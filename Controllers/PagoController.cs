@@ -31,7 +31,7 @@ namespace ClusterWeb.Controllers
                 DeudaId = p.DeudaId,
                 MontoPagado = p.MontoPagado,
                 FechaPago = p.FechaPago,
-                MetodoPago = p.MetodoPago
+                MetodoPago = p.MetodoPago,
             }).ToList();
 
             return Ok(pagoDtos);
@@ -55,7 +55,7 @@ namespace ClusterWeb.Controllers
                 DeudaId = pago.DeudaId,
                 MontoPagado = pago.MontoPagado,
                 FechaPago = pago.FechaPago,
-                MetodoPago = pago.MetodoPago  // Corregido: se usa la variable 'pago'
+                MetodoPago = pago.MetodoPago,
             };
 
             return Ok(pagoDto);
@@ -75,7 +75,7 @@ namespace ClusterWeb.Controllers
                 DeudaId = pagoCreateDto.DeudaId,
                 MontoPagado = pagoCreateDto.MontoPagado,
                 FechaPago = pagoCreateDto.FechaPago,
-                MetodoPago = pagoCreateDto.MetodoPago
+                MetodoPago = pagoCreateDto.MetodoPago,
             };
 
             _context.Pagos.Add(pago);
@@ -87,7 +87,7 @@ namespace ClusterWeb.Controllers
                 DeudaId = pago.DeudaId,
                 MontoPagado = pago.MontoPagado,
                 FechaPago = pago.FechaPago,
-                MetodoPago = pago.MetodoPago
+                MetodoPago = pago.MetodoPago,
             };
 
             return CreatedAtAction(nameof(GetPagoById), new { id = pago.PagoId }, pagoDto);
@@ -156,3 +156,29 @@ namespace ClusterWeb.Controllers
         }
     }
 }
+
+//el metodo gets me lo trae asi:
+// {
+//   "pagoId": 2,
+//   "deudaId": 1,
+//   "montoPagado": 200,
+//   "fechaPago": "2025-02-21T12:00:00",
+//   "metodoPago": 0,
+//   "residenteId": null
+// }
+// cuando se esperan que se vea asi:
+// {
+//   "pagoId": 2,
+//   "deudaId": 1,
+//   "montoPagado": 200,
+//   "fechaPago": "2025-02-21T12:00:00",
+//   "metodoPago": "Efectivo", O "Tarjeta" O "Transferencia"
+//   "residenteId": null
+// }
+
+//SOLO FUNCIONA:
+//Get = lo trae pero no muestra el metodo de pago
+//Post = Funciona
+//Get {id} = lo trae pero no muestra el metodo de pago
+//Put = No funciona (no actualiza)
+//Delete = Funciona

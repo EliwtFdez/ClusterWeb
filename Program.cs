@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using ClusterWeb.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,23 +10,28 @@ namespace ClusterWeb
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Agregar la configuración de la base de datos
+            // Configurazaoo de la base de datos
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
-            // Agregar controladores y Swagger
-            builder.Services.AddControllers();
+            // Agregar controladores con conversor global para enums a cadena
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
+
+            // Configurar Swagger y Endpoints
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
-            // Aplicar migraciones automáticamente (Opcional, pero útil en desarrollo)
+            // Aplicar migraciones automáticamente (útil en desarrollo)
             using (var scope = app.Services.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                dbContext.Database.Migrate(); // Aplica las migraciones automáticamente al iniciar
+                dbContext.Database.Migrate();
             }
 
             // Configurar Swagger solo en desarrollo

@@ -1,20 +1,20 @@
-using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using ClusterWeb.Entities;
 
 namespace ClusterWeb.DTOs
 {
-    // DTO para mostrar la información del pago
     public class PagoDto
     {
         public int PagoId { get; set; }
         public int DeudaId { get; set; }
         public decimal MontoPagado { get; set; }
         public DateTime FechaPago { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public MetodoPago MetodoPago { get; set; }
+        public int? ResidenteId { get; set; }
     }
 
-    // DTO para la creación de un nuevo pago
     public class PagoCreateDto
     {
         [Required]
@@ -25,11 +25,12 @@ namespace ClusterWeb.DTOs
         
         public DateTime FechaPago { get; set; } = DateTime.Now;
         
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         [Required]
         public MetodoPago MetodoPago { get; set; }
+        public int? ResidenteId { get; set; }
     }
 
-    // DTO para actualizar un pago existente
     public class PagoUpdateDto
     {
         [Required]
@@ -40,7 +41,9 @@ namespace ClusterWeb.DTOs
         
         public DateTime FechaPago { get; set; }
         
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         [Required]
         public MetodoPago MetodoPago { get; set; }
+        public int? ResidenteId { get; set; }
     }
 }
