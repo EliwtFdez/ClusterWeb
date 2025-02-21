@@ -156,29 +156,3 @@ namespace ClusterWeb.Controllers
         }
     }
 }
-
-//el metodo gets me lo trae asi:
-// {
-//   "pagoId": 2,
-//   "deudaId": 1,
-//   "montoPagado": 200,
-//   "fechaPago": "2025-02-21T12:00:00",
-//   "metodoPago": 0,
-//   "residenteId": null
-// }
-// cuando se esperan que se vea asi:
-// {
-//   "pagoId": 2,
-//   "deudaId": 1,
-//   "montoPagado": 200,
-//   "fechaPago": "2025-02-21T12:00:00",
-//   "metodoPago": "Efectivo", O "Tarjeta" O "Transferencia"
-//   "residenteId": null
-// }
-
-//SOLO FUNCIONA:
-//Get = lo trae pero no muestra el metodo de pago
-//Post = Funciona
-//Get {id} = lo trae pero no muestra el metodo de pago
-//Put = No funciona (no actualiza)
-//Delete = Funciona
