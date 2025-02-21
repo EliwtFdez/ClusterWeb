@@ -8,6 +8,8 @@ namespace ClusterWeb.Entities
     {
         [Key]
         public int DeudaId { get; set; }
+        
+        // Relación con Residente y Casa
         public int ResidenteId { get; set; }
         public int CasaId { get; set; }
 
@@ -27,6 +29,7 @@ namespace ClusterWeb.Entities
 
         public DateTime FechaRegistro { get; set; } = DateTime.Now;
 
+        // Navegación
         public virtual Residente Residente { get; set; }
         public virtual Casa Casa { get; set; }
     }

@@ -9,10 +9,9 @@ namespace ClusterWeb.Entities
         public int Banos { get; set; }
         public DateTime FechaRegistro { get; set; } = DateTime.Now;
 
-        // Relación con Residentes
+        // Relaciones
         public ICollection<Residente> Residentes { get; set; } = new List<Residente>();
-        public ICollection<Deuda> Deudas { get; set; }  = new List<Deuda>();
+        public ICollection<Deuda> Deudas { get; set; } = new List<Deuda>();
     }
-
 
 }

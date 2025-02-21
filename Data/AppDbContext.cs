@@ -70,18 +70,10 @@ namespace ClusterWeb.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Pago>()
-                .HasOne(p => p.Residente)
-                .WithMany(r => r.Pagos)
-                .HasForeignKey(p => p.ResidenteId)
-                .OnDelete(DeleteBehavior.Restrict); 
-
-            modelBuilder.Entity<Pago>()
                 .HasOne(p => p.Deuda)
                 .WithMany()
                 .HasForeignKey(p => p.DeudaId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-
         }
     }
 }

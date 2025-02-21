@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ClusterWeb.Entities
 {
-    
     public class Residente
     {
         [Key]
@@ -22,10 +21,11 @@ namespace ClusterWeb.Entities
         public DateTime FechaIngreso { get; set; }
         public DateTime FechaRegistro { get; set; } = DateTime.Now;
 
-        // Clave foránea
+        // Relación con Casa
         public int CasaId { get; set; }
         public virtual Casa Casa { get; set; }
 
+        // Relaciones
         public virtual ICollection<Deuda> Deudas { get; set; } = new List<Deuda>();
         public virtual ICollection<Pago> Pagos { get; set; } = new List<Pago>();
     }

@@ -21,12 +21,14 @@ namespace ClusterWeb.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPagos()
         {
-            var pagos = await _context.Pagos.ToListAsync();
+            var pagos = await _context.Pagos
+                .Include(p => p.Deuda)
+                .ToListAsync();
+
             var pagoDtos = pagos.Select(p => new PagoDto
             {
                 PagoId = p.PagoId,
                 DeudaId = p.DeudaId,
-                ResidenteId = p.ResidenteId,
                 MontoPagado = p.MontoPagado,
                 FechaPago = p.FechaPago,
                 MetodoPago = p.MetodoPago
@@ -39,7 +41,9 @@ namespace ClusterWeb.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPagoById(int id)
         {
-            var pago = await _context.Pagos.FindAsync(id);
+            var pago = await _context.Pagos
+                .Include(p => p.Deuda)
+                .FirstOrDefaultAsync(p => p.PagoId == id);
             if (pago == null)
             {
                 return NotFound();
@@ -49,10 +53,9 @@ namespace ClusterWeb.Controllers
             {
                 PagoId = pago.PagoId,
                 DeudaId = pago.DeudaId,
-                ResidenteId = pago.ResidenteId,
                 MontoPagado = pago.MontoPagado,
                 FechaPago = pago.FechaPago,
-                MetodoPago = pago.MetodoPago
+                MetodoPago = pago.MetodoPago  // Corregido: se usa la variable 'pago'
             };
 
             return Ok(pagoDto);
@@ -67,11 +70,9 @@ namespace ClusterWeb.Controllers
                 return BadRequest(ModelState);
             }
 
-            // Mapear de DTO a entidad
             var pago = new Pago
             {
                 DeudaId = pagoCreateDto.DeudaId,
-                ResidenteId = pagoCreateDto.ResidenteId,
                 MontoPagado = pagoCreateDto.MontoPagado,
                 FechaPago = pagoCreateDto.FechaPago,
                 MetodoPago = pagoCreateDto.MetodoPago
@@ -80,12 +81,10 @@ namespace ClusterWeb.Controllers
             _context.Pagos.Add(pago);
             await _context.SaveChangesAsync();
 
-            // Mapear la entidad creada a DTO para la respuesta
             var pagoDto = new PagoDto
             {
                 PagoId = pago.PagoId,
                 DeudaId = pago.DeudaId,
-                ResidenteId = pago.ResidenteId,
                 MontoPagado = pago.MontoPagado,
                 FechaPago = pago.FechaPago,
                 MetodoPago = pago.MetodoPago
@@ -109,9 +108,7 @@ namespace ClusterWeb.Controllers
                 return NotFound();
             }
 
-            // Mapear las propiedades actualizadas del DTO a la entidad
             pago.DeudaId = pagoUpdateDto.DeudaId;
-            pago.ResidenteId = pagoUpdateDto.ResidenteId;
             pago.MontoPagado = pagoUpdateDto.MontoPagado;
             pago.FechaPago = pagoUpdateDto.FechaPago;
             pago.MetodoPago = pagoUpdateDto.MetodoPago;
