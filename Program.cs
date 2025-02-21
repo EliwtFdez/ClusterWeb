@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using ClusterWeb.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace ClusterWeb
 {
@@ -10,7 +11,7 @@ namespace ClusterWeb
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Configurazaoo de la base de datos
+            // Configuración de la base de datos
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
@@ -23,7 +24,12 @@ namespace ClusterWeb
 
             // Configurar Swagger y Endpoints
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
 
             var app = builder.Build();
 

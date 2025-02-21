@@ -3,6 +3,7 @@ using ClusterWeb.DTOs;
 using ClusterWeb.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 
 namespace ClusterWeb.Controllers
 {
@@ -18,9 +19,12 @@ namespace ClusterWeb.Controllers
         }
 
         /// <summary>
-        /// Obtiene todas las casas registradas.
+        /// Obtiene todas las casas con sus residentes
         /// </summary>
+        /// <returns>Lista de casas con información de residentes</returns>
         [HttpGet]
+        [Description("Obtiene todas las casas con sus residentes")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<CasaCreateDto>>> GetCasas()
         {
             var casas = await _context.Casas
@@ -49,9 +53,14 @@ namespace ClusterWeb.Controllers
         }
 
         /// <summary>
-        /// Obtiene una casa por su ID.
+        /// Obtiene una casa específica por su ID
         /// </summary>
+        /// <param name="id">ID de la casa</param>
+        /// <returns>Información detallada de la casa</returns>
         [HttpGet("{id}")]
+        [Description("Obtiene una casa específica por su ID")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Casa>> GetCasa(int id)
         {
             var casa = await _context.Casas
@@ -65,10 +74,14 @@ namespace ClusterWeb.Controllers
         }
 
         /// <summary>
-        /// Crea una nueva casa.
+        /// Crea una nueva casa
         /// </summary>
-
+        /// <param name="casaDto">Datos de la casa a crear</param>
+        /// <returns>Casa creada</returns>
         [HttpPost]
+        [Description("Crea una nueva casa")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Casa>> CreateCasa([FromBody] CasaCreateDto casaDto)
         {
             if (!ModelState.IsValid)
@@ -90,10 +103,16 @@ namespace ClusterWeb.Controllers
         }
 
         /// <summary>
-        /// Actualiza los datos de una casa.
+        /// Actualiza los datos de una casa existente
         /// </summary>
-
+        /// <param name="id">ID de la casa a actualizar</param>
+        /// <param name="casaDto">Nuevos datos de la casa</param>
+        /// <returns>No content si la actualización es exitosa</returns>
         [HttpPut("{id}")]
+        [Description("Actualiza los datos de una casa existente")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateCasa(int id, [FromBody] CasaCreateDto casaDto)
         {
             var casa = await _context.Casas.FindAsync(id);
@@ -101,7 +120,6 @@ namespace ClusterWeb.Controllers
             if (casa == null)
                 return NotFound(new { mensaje = "Casa no encontrada" });
 
-            // Actualizar solo los campos necesarios
             casa.Direccion = casaDto.Direccion;
             casa.NumeroCasa = casaDto.NumeroCasa;
             casa.Habitaciones = casaDto.Habitaciones;
@@ -118,15 +136,18 @@ namespace ClusterWeb.Controllers
                 return StatusCode(500, new { mensaje = "Error al actualizar la casa" });
             }
 
-            return NoContent(); // Respuesta estándar de actualización exitosa sin contenido
+            return NoContent();
         }
 
-
         /// <summary>
-        /// Elimina una casa por su ID.
+        /// Elimina una casa por su ID
         /// </summary>
-
+        /// <param name="id">ID de la casa a eliminar</param>
+        /// <returns>No content si la eliminación es exitosa</returns>
         [HttpDelete("{id}")]
+        [Description("Elimina una casa por su ID")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCasa(int id)
         {
             var casa = await _context.Casas.FindAsync(id);

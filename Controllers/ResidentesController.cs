@@ -6,6 +6,9 @@ using ClusterWeb.DTOs;
 
 namespace ClusterWeb.Controllers
 {
+    /// <summary>
+    /// Controlador para gestionar los residentes
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ResidentesController : ControllerBase
@@ -18,38 +21,66 @@ namespace ClusterWeb.Controllers
         }
 
         /// <summary>
-        /// Obtiene todos los residentes registrados.
+        /// Obtiene todos los residentes registrados
         /// </summary>
+        /// <returns>Lista de residentes</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Residente>>> GetResidentes()
+        public async Task<ActionResult<IEnumerable<ResidenteCreateDto>>> GetResidentes()
         {
-            return await _context.Residentes.ToListAsync();
+            var residentes = await _context.Residentes
+                .Select(r => new ResidenteCreateDto
+                {
+                    ResidenteId = r.ResidenteId,
+                    Nombre = r.Nombre,
+                    Telefono = r.Telefono,
+                    Email = r.Email,
+                    CasaId = r.CasaId,
+                    FechaIngreso = r.FechaIngreso,
+                    FechaRegistro = r.FechaRegistro
+                })
+                .ToListAsync();
+
+            return Ok(residentes);
         }
 
         /// <summary>
-        /// Obtiene un residente por su ID.
+        /// Obtiene un residente por su ID
         /// </summary>
+        /// <param name="id">ID del residente</param>
+        /// <returns>Residente solicitado</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Residente>> GetResidente(int id)
+        public async Task<ActionResult<ResidenteCreateDto>> GetResidente(int id)
         {
             var residente = await _context.Residentes.FindAsync(id);
 
             if (residente == null)
                 return NotFound(new { mensaje = "Residente no encontrado" });
 
-            return residente;
+            var residenteDto = new ResidenteCreateDto
+            {
+                ResidenteId = residente.ResidenteId,
+                Nombre = residente.Nombre,
+                Telefono = residente.Telefono,
+                Email = residente.Email,
+                CasaId = residente.CasaId,
+                FechaIngreso = residente.FechaIngreso,
+                FechaRegistro = residente.FechaRegistro
+            };
+
+            return Ok(residenteDto);
         }
 
         /// <summary>
-        /// Crea un nuevo residente.
+        /// Crea un nuevo residente
         /// </summary>
+        /// <param name="ResidenteCreateDto">Datos del residente a crear</param>
+        /// <returns>Residente creado</returns>
         [HttpPost]
-        public async Task<ActionResult<Residente>> PostResidente([FromBody] ResidenteCreateDto residenteDto)
+        public async Task<ActionResult<ResidenteCreateDto>> PostResidente([FromBody] ResidenteCreateDto residenteDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Opcional: validar que la Casa existe antes de asignarla
             var casaExiste = await _context.Casas.AnyAsync(c => c.CasaId == residenteDto.CasaId);
             if (!casaExiste)
                 return NotFound(new { mensaje = "Casa no encontrada" });
@@ -59,7 +90,7 @@ namespace ClusterWeb.Controllers
                 Nombre = residenteDto.Nombre,
                 Telefono = residenteDto.Telefono,
                 Email = residenteDto.Email,
-                CasaId = residenteDto.CasaId, // Asignación de la clave foránea
+                CasaId = residenteDto.CasaId,
                 FechaIngreso = DateTime.Now,
                 FechaRegistro = DateTime.Now
             };
@@ -67,25 +98,44 @@ namespace ClusterWeb.Controllers
             _context.Residentes.Add(residente);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetResidente), new { id = residente.ResidenteId }, residente);
+            var nuevoResidenteDto = new ResidenteCreateDto
+            {
+                ResidenteId = residente.ResidenteId,
+                Nombre = residente.Nombre,
+                Telefono = residente.Telefono,
+                Email = residente.Email,
+                CasaId = residente.CasaId,
+                FechaIngreso = residente.FechaIngreso,
+                FechaRegistro = residente.FechaRegistro
+            };
+
+            return CreatedAtAction(nameof(GetResidente), new { id = residente.ResidenteId }, nuevoResidenteDto);
         }
 
-
         /// <summary>
-        /// Actualiza un residente existente.
+        /// Actualiza un residente existente
         /// </summary>
+        /// <param name="id">ID del residente a actualizar</param>
+        /// <param name="residenteDto">Datos actualizados del residente</param>
+        /// <returns>No content</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateResidente(int id, [FromBody] ResidenteCreateDto residenteDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var residente = await _context.Residentes.FindAsync(id);
             if (residente == null)
                 return NotFound(new { mensaje = "Residente no encontrado" });
 
-            // Actualizar los valores permitidos desde el DTO
+            var casaExiste = await _context.Casas.AnyAsync(c => c.CasaId == residenteDto.CasaId);
+            if (!casaExiste)
+                return NotFound(new { mensaje = "Casa no encontrada" });
+
             residente.Nombre = residenteDto.Nombre;
             residente.Telefono = residenteDto.Telefono;
             residente.Email = residenteDto.Email;
-            residente.CasaId = residenteDto.CasaId; // Actualizamos la relación
+            residente.CasaId = residenteDto.CasaId;
 
             try
             {
@@ -93,16 +143,19 @@ namespace ClusterWeb.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                throw;
+                if (!ResidenteExists(id))
+                    return NotFound(new { mensaje = "Residente no encontrado" });
+                else throw;
             }
 
             return NoContent();
         }
 
-
         /// <summary>
-        /// Elimina un residente por su ID.
+        /// Elimina un residente
         /// </summary>
+        /// <param name="id">ID del residente a eliminar</param>
+        /// <returns>No content</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteResidente(int id)
         {
@@ -114,6 +167,11 @@ namespace ClusterWeb.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        private bool ResidenteExists(int id)
+        {
+            return _context.Residentes.Any(e => e.ResidenteId == id);
         }
     }
 }

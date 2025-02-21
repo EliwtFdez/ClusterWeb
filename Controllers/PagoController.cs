@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ClusterWeb.Controllers
 {
+    /// <summary>
+    /// Controlador para gestionar los pagos
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class PagoController : ControllerBase
@@ -17,7 +20,10 @@ namespace ClusterWeb.Controllers
             _context = context;
         }
 
-        // GET: api/pago
+        /// <summary>
+        /// Obtiene todos los pagos
+        /// </summary>
+        /// <returns>Lista de pagos</returns>
         [HttpGet]
         public async Task<IActionResult> GetPagos()
         {
@@ -37,7 +43,11 @@ namespace ClusterWeb.Controllers
             return Ok(pagoDtos);
         }
 
-        // GET: api/pago/{id}
+        /// <summary>
+        /// Obtiene un pago específico por su ID
+        /// </summary>
+        /// <param name="id">ID del pago</param>
+        /// <returns>Pago solicitado</returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPagoById(int id)
         {
@@ -46,7 +56,7 @@ namespace ClusterWeb.Controllers
                 .FirstOrDefaultAsync(p => p.PagoId == id);
             if (pago == null)
             {
-                return NotFound();
+                return NotFound(new { mensaje = "Pago no encontrado" });
             }
 
             var pagoDto = new PagoDto
@@ -61,14 +71,20 @@ namespace ClusterWeb.Controllers
             return Ok(pagoDto);
         }
 
-        // POST: api/pago
+        /// <summary>
+        /// Crea un nuevo pago
+        /// </summary>
+        /// <param name="pagoCreateDto">Datos del pago a crear</param>
+        /// <returns>Pago creado</returns>
         [HttpPost]
         public async Task<IActionResult> CreatePago([FromBody] PagoCreateDto pagoCreateDto)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
+
+            var deudaExiste = await _context.Deudas.AnyAsync(d => d.DeudaId == pagoCreateDto.DeudaId);
+            if (!deudaExiste)
+                return NotFound(new { mensaje = "Deuda no encontrada" });
 
             var pago = new Pago
             {
@@ -93,7 +109,12 @@ namespace ClusterWeb.Controllers
             return CreatedAtAction(nameof(GetPagoById), new { id = pago.PagoId }, pagoDto);
         }
 
-        // PUT: api/pago/{id}
+        /// <summary>
+        /// Actualiza un pago existente
+        /// </summary>
+        /// <param name="id">ID del pago a actualizar</param>
+        /// <param name="pagoUpdateDto">Datos actualizados del pago</param>
+        /// <returns>No content</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePago(int id, [FromBody] PagoUpdateDto pagoUpdateDto)
         {
@@ -105,8 +126,12 @@ namespace ClusterWeb.Controllers
             var pago = await _context.Pagos.FindAsync(id);
             if (pago == null)
             {
-                return NotFound();
+                return NotFound(new { mensaje = "Pago no encontrado" });
             }
+
+            var deudaExiste = await _context.Deudas.AnyAsync(d => d.DeudaId == pagoUpdateDto.DeudaId);
+            if (!deudaExiste)
+                return NotFound(new { mensaje = "Deuda no encontrada" });
 
             pago.DeudaId = pagoUpdateDto.DeudaId;
             pago.MontoPagado = pagoUpdateDto.MontoPagado;
@@ -122,26 +147,25 @@ namespace ClusterWeb.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 if (!PagoExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                    return NotFound(new { mensaje = "Pago no encontrado" });
+                else throw;
             }
 
             return NoContent();
         }
 
-        // DELETE: api/pago/{id}
+        /// <summary>
+        /// Elimina un pago
+        /// </summary>
+        /// <param name="id">ID del pago a eliminar</param>
+        /// <returns>No content</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePago(int id)
         {
             var pago = await _context.Pagos.FindAsync(id);
             if (pago == null)
             {
-                return NotFound();
+                return NotFound(new { mensaje = "Pago no encontrado" });
             }
 
             _context.Pagos.Remove(pago);

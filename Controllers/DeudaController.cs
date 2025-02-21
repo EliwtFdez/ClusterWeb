@@ -6,19 +6,25 @@ using ClusterWeb.DTOs;
 
 namespace ClusterWeb.Controllers
 {
+    /// <summary>
+    /// Controlador para gestionar las deudas
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class DeudaController : ControllerBase
     {
         private readonly AppDbContext _context;
 
+
         public DeudaController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/deuda
-        // No funciona
+        /// <summary>
+        /// Obtiene todas las deudas
+        /// </summary>
+        /// <returns>Lista de deudas</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DeudaDto>>> GetDeudas()
         {
@@ -31,7 +37,7 @@ namespace ClusterWeb.Controllers
                     Monto = d.Monto,
                     SaldoPendiente = d.SaldoPendiente,
                     FechaVencimiento = d.FechaVencimiento,
-                    Estado = d.Estado.ToString(), // Conversión a string
+                    Estado = d.Estado.ToString(),
                     Descripcion = d.Descripcion,
                     FechaRegistro = d.FechaRegistro
                 })
@@ -40,8 +46,11 @@ namespace ClusterWeb.Controllers
             return Ok(deudas);
         }
 
-        // GET: api/deuda/{id}
-        // FUNCIONA
+        /// <summary>
+        /// Obtiene una deuda específica por su ID
+        /// </summary>
+        /// <param name="id">ID de la deuda</param>
+        /// <returns>Deuda solicitada</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<DeudaDto>> GetDeuda(int id)
         {
@@ -58,7 +67,7 @@ namespace ClusterWeb.Controllers
                 Monto = deuda.Monto,
                 SaldoPendiente = deuda.SaldoPendiente,
                 FechaVencimiento = deuda.FechaVencimiento,
-                Estado = deuda.Estado.ToString(), // Conversión a string
+                Estado = deuda.Estado.ToString(),
                 Descripcion = deuda.Descripcion,
                 FechaRegistro = deuda.FechaRegistro
             };
@@ -66,25 +75,25 @@ namespace ClusterWeb.Controllers
             return Ok(deudaDto);
         }
 
-        // POST: api/deuda
-        
+        /// <summary>
+        /// Crea una nueva deuda
+        /// </summary>
+        /// <param name="deudaDto">Datos de la deuda a crear</param>
+        /// <returns>Deuda creada</returns>
         [HttpPost]
         public async Task<ActionResult<DeudaDto>> CreateDeuda([FromBody] DeudaCreateDto deudaDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Validar que el Residente exista
             var residenteExiste = await _context.Residentes.AnyAsync(r => r.ResidenteId == deudaDto.ResidenteId);
             if (!residenteExiste)
                 return NotFound(new { mensaje = "Residente no encontrado" });
 
-            // Validar que la Casa exista
             var casaExiste = await _context.Casas.AnyAsync(c => c.CasaId == deudaDto.CasaId);
             if (!casaExiste)
                 return NotFound(new { mensaje = "Casa no encontrada" });
 
-            // Convertir el string del DTO a enum (ignorando mayúsculas/minúsculas)
             EstadoDeuda estadoEnum;
             try
             {
@@ -118,7 +127,7 @@ namespace ClusterWeb.Controllers
                 Monto = deuda.Monto,
                 SaldoPendiente = deuda.SaldoPendiente,
                 FechaVencimiento = deuda.FechaVencimiento,
-                Estado = deuda.Estado.ToString(), // Conversión a string
+                Estado = deuda.Estado.ToString(),
                 Descripcion = deuda.Descripcion,
                 FechaRegistro = deuda.FechaRegistro
             };
@@ -126,7 +135,12 @@ namespace ClusterWeb.Controllers
             return CreatedAtAction(nameof(GetDeuda), new { id = deuda.DeudaId }, resultDto);
         }
 
-        // PUT: api/deuda/{id}
+        /// <summary>
+        /// Actualiza una deuda existente
+        /// </summary>
+        /// <param name="id">ID de la deuda a actualizar</param>
+        /// <param name="deudaDto">Nuevos datos de la deuda</param>
+        /// <returns>No content</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDeuda(int id, [FromBody] DeudaUpdateDto deudaDto)
         {
@@ -137,7 +151,6 @@ namespace ClusterWeb.Controllers
             if (deuda == null)
                 return NotFound(new { mensaje = "Deuda no encontrada" });
 
-            // Convertir el string del DTO a enum (ignorando mayúsculas/minúsculas)
             EstadoDeuda estadoEnum;
             try
             {
@@ -148,7 +161,6 @@ namespace ClusterWeb.Controllers
                 return BadRequest(new { mensaje = "Estado no válido" });
             }
 
-            // Actualizar los campos permitidos
             deuda.ResidenteId = deudaDto.ResidenteId;
             deuda.CasaId = deudaDto.CasaId;
             deuda.Monto = deudaDto.Monto;
@@ -156,7 +168,6 @@ namespace ClusterWeb.Controllers
             deuda.FechaVencimiento = deudaDto.FechaVencimiento;
             deuda.Estado = estadoEnum;
             deuda.Descripcion = deudaDto.Descripcion;
-            // Normalmente no se actualiza FechaRegistro
 
             try
             {
@@ -173,8 +184,11 @@ namespace ClusterWeb.Controllers
             return NoContent();
         }
 
-        // DELETE: api/deuda/{id}
-        //FUNCIONA NO TOCAR
+        /// <summary>
+        /// Elimina una deuda
+        /// </summary>
+        /// <param name="id">ID de la deuda a eliminar</param>
+        /// <returns>No content</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDeuda(int id)
         {
