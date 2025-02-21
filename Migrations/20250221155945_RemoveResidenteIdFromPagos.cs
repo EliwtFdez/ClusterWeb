@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ClusterWeb.Migrations
 {
     /// <inheritdoc />
-    public partial class FixCascadingDelete : Migration
+    public partial class RemoveResidenteIdFromPagos : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -91,10 +91,10 @@ namespace ClusterWeb.Migrations
                     PagoId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DeudaId = table.Column<int>(type: "int", nullable: false),
-                    ResidenteId = table.Column<int>(type: "int", nullable: false),
                     MontoPagado = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     FechaPago = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
-                    MetodoPago = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    MetodoPago = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ResidenteId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -109,8 +109,7 @@ namespace ClusterWeb.Migrations
                         name: "FK_Pagos_Residentes_ResidenteId",
                         column: x => x.ResidenteId,
                         principalTable: "Residentes",
-                        principalColumn: "ResidenteId",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "ResidenteId");
                 });
 
             migrationBuilder.CreateIndex(

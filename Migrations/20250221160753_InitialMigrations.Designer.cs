@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClusterWeb.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250220164420_FixCascadingDelete")]
-    partial class FixCascadingDelete
+    [Migration("20250221160753_InitialMigrations")]
+    partial class InitialMigrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -131,7 +131,7 @@ namespace ClusterWeb.Migrations
                     b.Property<decimal>("MontoPagado")
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<int>("ResidenteId")
+                    b.Property<int?>("ResidenteId")
                         .HasColumnType("int");
 
                     b.HasKey("PagoId");
@@ -212,15 +212,11 @@ namespace ClusterWeb.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ClusterWeb.Entities.Residente", "Residente")
+                    b.HasOne("ClusterWeb.Entities.Residente", null)
                         .WithMany("Pagos")
-                        .HasForeignKey("ResidenteId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ResidenteId");
 
                     b.Navigation("Deuda");
-
-                    b.Navigation("Residente");
                 });
 
             modelBuilder.Entity("ClusterWeb.Entities.Residente", b =>

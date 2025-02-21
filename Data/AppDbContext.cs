@@ -1,5 +1,6 @@
 using ClusterWeb.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ClusterWeb.Data
 {
@@ -74,6 +75,9 @@ namespace ClusterWeb.Data
                 .WithMany()
                 .HasForeignKey(p => p.DeudaId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            //modelBuilder.DropColumn(nameof:"ResidenteId",Table: "Pagos");
+
         }
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClusterWeb.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250221015510_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20250221155945_RemoveResidenteIdFromPagos")]
+    partial class RemoveResidenteIdFromPagos
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
