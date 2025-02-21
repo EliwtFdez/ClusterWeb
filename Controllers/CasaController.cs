@@ -20,17 +20,37 @@ namespace ClusterWeb.Controllers
         /// <summary>
         /// Obtiene todas las casas registradas.
         /// </summary>
-       
-         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Casa>>> GetCasas()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<CasaCreateDto>>> GetCasas()
         {
-            return await _context.Casas.Include(c => c.Residentes).ToListAsync();
+            var casas = await _context.Casas
+                                    .Include(c => c.Residentes)
+                                    .ToListAsync();
+
+            var casasDto = casas.Select(c => new CasaCreateDto
+            {
+                Direccion = c.Direccion,
+                NumeroCasa = c.NumeroCasa,
+                Habitaciones = c.Habitaciones,
+                Banos = c.Banos,
+                FechaRegistro = c.FechaRegistro,
+                Residentes = c.Residentes.Select(r => new ResidenteCreateDto 
+                {
+                    ResidenteId = r.ResidenteId,
+                    Nombre = r.Nombre,
+                    Telefono = r.Telefono,
+                    Email = r.Email,
+                    FechaIngreso = r.FechaIngreso,
+                    FechaRegistro = r.FechaRegistro
+                }).ToList()
+            }).ToList();
+
+            return Ok(casasDto);
         }
 
         /// <summary>
         /// Obtiene una casa por su ID.
         /// </summary>
-
         [HttpGet("{id}")]
         public async Task<ActionResult<Casa>> GetCasa(int id)
         {

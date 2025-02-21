@@ -1,52 +1,191 @@
-using ClusterWeb.Entities;
-using ClusterWeb.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ClusterWeb.Data;
+using ClusterWeb.Entities;
+using ClusterWeb.DTOs;
 
 namespace ClusterWeb.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class DeudaController : ControllerBase
     {
-        // GET: api/deuda
-        [HttpGet]
-        public IActionResult GetAllDeudas()
+        private readonly AppDbContext _context;
+
+        public DeudaController(AppDbContext context)
         {
-            // Logic to get all deudas
-            return Ok(new { message = "Get all deudas" });
+            _context = context;
+        }
+
+        // GET: api/deuda
+        // No funciona
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<DeudaDto>>> GetDeudas()
+        {
+            var deudas = await _context.Deudas
+                .Select(d => new DeudaDto
+                {
+                    DeudaId = d.DeudaId,
+                    ResidenteId = d.ResidenteId,
+                    CasaId = d.CasaId,
+                    Monto = d.Monto,
+                    SaldoPendiente = d.SaldoPendiente,
+                    FechaVencimiento = d.FechaVencimiento,
+                    Estado = d.Estado.ToString(), // Conversión a string
+                    Descripcion = d.Descripcion,
+                    FechaRegistro = d.FechaRegistro
+                })
+                .ToListAsync();
+
+            return Ok(deudas);
         }
 
         // GET: api/deuda/{id}
+        // FUNCIONA
         [HttpGet("{id}")]
-        public IActionResult GetDeudaById(int id)
+        public async Task<ActionResult<DeudaDto>> GetDeuda(int id)
         {
-            // Logic to get a deuda by id
-            return Ok(new { message = $"Get deuda with id {id}" });
+            var deuda = await _context.Deudas.FindAsync(id);
+
+            if (deuda == null)
+                return NotFound(new { mensaje = "Deuda no encontrada" });
+
+            var deudaDto = new DeudaDto
+            {
+                DeudaId = deuda.DeudaId,
+                ResidenteId = deuda.ResidenteId,
+                CasaId = deuda.CasaId,
+                Monto = deuda.Monto,
+                SaldoPendiente = deuda.SaldoPendiente,
+                FechaVencimiento = deuda.FechaVencimiento,
+                Estado = deuda.Estado.ToString(), // Conversión a string
+                Descripcion = deuda.Descripcion,
+                FechaRegistro = deuda.FechaRegistro
+            };
+
+            return Ok(deudaDto);
         }
 
         // POST: api/deuda
+        
         [HttpPost]
-        public IActionResult CreateDeuda([FromBody] Deuda deuda)
+        public async Task<ActionResult<DeudaDto>> CreateDeuda([FromBody] DeudaCreateDto deudaDto)
         {
-            // Logic to create a new deuda
-            return Ok(new { message = "Deuda created" });
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // Validar que el Residente exista
+            var residenteExiste = await _context.Residentes.AnyAsync(r => r.ResidenteId == deudaDto.ResidenteId);
+            if (!residenteExiste)
+                return NotFound(new { mensaje = "Residente no encontrado" });
+
+            // Validar que la Casa exista
+            var casaExiste = await _context.Casas.AnyAsync(c => c.CasaId == deudaDto.CasaId);
+            if (!casaExiste)
+                return NotFound(new { mensaje = "Casa no encontrada" });
+
+            // Convertir el string del DTO a enum (ignorando mayúsculas/minúsculas)
+            EstadoDeuda estadoEnum;
+            try
+            {
+                estadoEnum = Enum.Parse<EstadoDeuda>(deudaDto.Estado, ignoreCase: true);
+            }
+            catch (Exception)
+            {
+                return BadRequest(new { mensaje = "Estado no válido" });
+            }
+
+            var deuda = new Deuda
+            {
+                ResidenteId = deudaDto.ResidenteId,
+                CasaId = deudaDto.CasaId,
+                Monto = deudaDto.Monto,
+                SaldoPendiente = deudaDto.SaldoPendiente,
+                FechaVencimiento = deudaDto.FechaVencimiento,
+                Estado = estadoEnum,
+                Descripcion = deudaDto.Descripcion,
+                FechaRegistro = DateTime.Now
+            };
+
+            _context.Deudas.Add(deuda);
+            await _context.SaveChangesAsync();
+
+            var resultDto = new DeudaDto
+            {
+                DeudaId = deuda.DeudaId,
+                ResidenteId = deuda.ResidenteId,
+                CasaId = deuda.CasaId,
+                Monto = deuda.Monto,
+                SaldoPendiente = deuda.SaldoPendiente,
+                FechaVencimiento = deuda.FechaVencimiento,
+                Estado = deuda.Estado.ToString(), // Conversión a string
+                Descripcion = deuda.Descripcion,
+                FechaRegistro = deuda.FechaRegistro
+            };
+
+            return CreatedAtAction(nameof(GetDeuda), new { id = deuda.DeudaId }, resultDto);
         }
 
         // PUT: api/deuda/{id}
         [HttpPut("{id}")]
-        public IActionResult UpdateDeuda(int id, [FromBody] Deuda deuda)
+        public async Task<IActionResult> UpdateDeuda(int id, [FromBody] DeudaUpdateDto deudaDto)
         {
-            // Logic to update an existing deuda
-            return Ok(new { message = $"Deuda with id {id} updated" });
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var deuda = await _context.Deudas.FindAsync(id);
+            if (deuda == null)
+                return NotFound(new { mensaje = "Deuda no encontrada" });
+
+            // Convertir el string del DTO a enum (ignorando mayúsculas/minúsculas)
+            EstadoDeuda estadoEnum;
+            try
+            {
+                estadoEnum = Enum.Parse<EstadoDeuda>(deudaDto.Estado, ignoreCase: true);
+            }
+            catch (Exception)
+            {
+                return BadRequest(new { mensaje = "Estado no válido" });
+            }
+
+            // Actualizar los campos permitidos
+            deuda.ResidenteId = deudaDto.ResidenteId;
+            deuda.CasaId = deudaDto.CasaId;
+            deuda.Monto = deudaDto.Monto;
+            deuda.SaldoPendiente = deudaDto.SaldoPendiente;
+            deuda.FechaVencimiento = deudaDto.FechaVencimiento;
+            deuda.Estado = estadoEnum;
+            deuda.Descripcion = deudaDto.Descripcion;
+            // Normalmente no se actualiza FechaRegistro
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Deudas.Any(d => d.DeudaId == id))
+                    return NotFound(new { mensaje = "Deuda no encontrada" });
+                else
+                    throw;
+            }
+
+            return NoContent();
         }
 
         // DELETE: api/deuda/{id}
+        //FUNCIONA NO TOCAR
         [HttpDelete("{id}")]
-        public IActionResult DeleteDeuda(int id)
+        public async Task<IActionResult> DeleteDeuda(int id)
         {
-            // Logic to delete a deuda
-            return Ok(new { message = $"Deuda with id {id} deleted" });
+            var deuda = await _context.Deudas.FindAsync(id);
+            if (deuda == null)
+                return NotFound(new { mensaje = "Deuda no encontrada" });
+
+            _context.Deudas.Remove(deuda);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
-
 }

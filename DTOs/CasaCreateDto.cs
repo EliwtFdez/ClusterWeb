@@ -15,5 +15,7 @@ namespace ClusterWeb.DTOs
 
         [Range(1, 20)]
         public int Banos { get; set; }
+        public DateTime FechaRegistro { get; set; }
+        public List<ResidenteCreateDto> Residentes { get; set; }
     }
 }

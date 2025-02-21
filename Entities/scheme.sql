@@ -52,7 +52,7 @@ CREATE TABLE pagos (
 
 
 -- Insertar casas
-INSERT INTO casas (direccion, numero_casa, habitaciones, banos) VALUES
+INSERT INTO casas (direccion, NumeroCasa, habitaciones, banos) VALUES
 ('Calle Ficticia 123', 'A101', 3, 2),
 ('Avenida Imaginaria 456', 'B202', 4, 3),
 ('Paseo de la Fantasía 789', 'C303', 2, 1),
@@ -65,33 +65,33 @@ INSERT INTO casas (direccion, numero_casa, habitaciones, banos) VALUES
 ('Ruta Desconocida 444', 'J010', 4, 2);
 
 -- Insertar residentes
-INSERT INTO residentes (nombre, telefono, email, casa_id, fecha_ingreso) VALUES
-('Ana Pérez', '555-1234', 'ana.perez@example.com', 1, '2024-01-10'),
-('Carlos Gómez', '555-5678', 'carlos.gomez@example.com', 2, '2023-12-15'),
-('Lucía Sánchez', '555-4321', 'lucia.sanchez@example.com', 3, '2024-02-05'),
-('Jorge Ramírez', '555-8765', 'jorge.ramirez@example.com', 4, '2023-11-20'),
-('Marta Torres', '555-1111', 'marta.torres@example.com', 5, '2024-03-01'),
-('Diego Herrera', '555-2222', 'diego.herrera@example.com', 6, '2024-01-25'),
-('Sofía López', '555-3333', 'sofia.lopez@example.com', 7, '2023-10-30'),
-('Andrés Castro', '555-4444', 'andres.castro@example.com', 8, '2024-02-15'),
-('Laura Ruiz', '555-5555', 'laura.ruiz@example.com', 9, '2024-04-01'),
-('Pedro Fernández', '555-6666', 'pedro.fernandez@example.com', 10, '2023-09-10');
+INSERT INTO residentes (nombre, telefono, email, casaId, fechaIngreso) VALUES
+('Ana Pérez', '555-1234', 'ana.perez@example.com', 2, '2024-01-10'),
+('Carlos Gómez', '555-5678', 'carlos.gomez@example.com', 4, '2023-12-15'),
+('Lucía Sánchez', '555-4321', 'lucia.sanchez@example.com', 5, '2024-02-05'),
+('Jorge Ramírez', '555-8765', 'jorge.ramirez@example.com', 7, '2023-11-20'),
+('Marta Torres', '555-1111', 'marta.torres@example.com', 8, '2024-03-01'),
+('Diego Herrera', '555-2222', 'diego.herrera@example.com', 9, '2024-01-25'),
+('Sofía López', '555-3333', 'sofia.lopez@example.com', 10, '2023-10-30'),
+('Andrés Castro', '555-4444', 'andres.castro@example.com', 11, '2024-02-15'),
+('Laura Ruiz', '555-5555', 'laura.ruiz@example.com', 12, '2024-04-01'),
+('Pedro Fernández', '555-6666', 'pedro.fernandez@example.com', 13, '2023-09-10');
 
 -- Insertar deudas
-INSERT INTO deudas (residente_id, casa_id, monto, saldo_pendiente, fecha_vencimiento, estado, descripcion) VALUES
-(1, 1, 250.00, 250.00, '2024-05-10', 'pendiente', 'Cuota de mantenimiento'),
-(2, 2, 150.50, 0.00, '2024-04-15', 'pagado', 'Reparación de plomería'),
-(3, 3, 300.75, 150.75, '2024-06-01', 'parcial', 'Reparación eléctrica'),
-(4, 4, 400.00, 400.00, '2024-07-01', 'pendiente', 'Mantenimiento de jardín'),
-(5, 5, 100.00, 0.00, '2024-03-20', 'pagado', 'Reparación de fachada'),
-(6, 6, 500.00, 500.00, '2024-08-15', 'pendiente', 'Instalación de rejas'),
-(7, 7, 200.25, 50.25, '2024-05-05', 'parcial', 'Pintura exterior'),
-(8, 8, 350.60, 0.00, '2024-06-10', 'pagado', 'Cambio de cerradura'),
-(9, 9, 450.00, 450.00, '2024-04-25', 'pendiente', 'Limpieza de cisterna'),
-(10, 10, 275.80, 75.80, '2024-07-20', 'parcial', 'Reparación del techo');
+INSERT INTO deudas (residenteid, casaid, monto, saldo_pendiente, fecha_vencimiento, estado, descripcion) VALUES
+(3, 2, 250.00, 250.00, '2024-05-10', 'pendiente', 'Cuota de mantenimiento'),
+(4, 4, 150.50, 0.00, '2024-04-15', 'pagado', 'Reparación de plomería'),
+(6, 5, 300.75, 150.75, '2024-06-01', 'parcial', 'Reparación eléctrica'),
+(7, 7, 400.00, 400.00, '2024-07-01', 'pendiente', 'Mantenimiento de jardín'),
+(8, 8, 100.00, 0.00, '2024-03-20', 'pagado', 'Reparación de fachada'),
+(9, 9, 500.00, 500.00, '2024-08-15', 'pendiente', 'Instalación de rejas'),
+(10, 10, 200.25, 50.25, '2024-05-05', 'parcial', 'Pintura exterior'),
+(11,11, 350.60, 0.00, '2024-06-10', 'pagado', 'Cambio de cerradura'),
+(12, 12, 450.00, 450.00, '2024-04-25', 'pendiente', 'Limpieza de cisterna'),
+(13, 13, 275.80, 75.80, '2024-07-20', 'parcial', 'Reparación del techo');
 
 -- Insertar pagos
-INSERT INTO pagos (deuda_id, residente_id, monto_pagado, metodo_pago) VALUES
+INSERT INTO pagos (deudaid, residenteid, monto_pagado, metodo_pago) VALUES
 (3, 3, 150.00, 'transferencia'),
 (7, 7, 150.00, 'efectivo'),
 (10, 10, 200.00, 'tarjeta');
