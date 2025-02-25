@@ -1,17 +1,22 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ClusterWeb.Entities
 {
     public class Casa
     {
-        public int CasaId { get; set; }
-        public string Direccion { get; set; }
+        [Key]
+        public int IdCasa { get; set; }
+        
+        [Required, MaxLength(10)]
         public string NumeroCasa { get; set; }
-        public int Habitaciones { get; set; }
-        public int Banos { get; set; }
-        public DateTime FechaRegistro { get; set; } = DateTime.Now;
+        
+        [MaxLength(200)]
+        public string? Direccion { get; set; }
 
-        // Relaciones
-        public ICollection<Residente> Residentes { get; set; } = new List<Residente>();
-        public ICollection<Deuda> Deudas { get; set; } = new List<Deuda>();
+        // Relación "Casa -> muchos Residentes"
+        public virtual ICollection<Residente> Residentes { get; set; } = new List<Residente>();
+
+        // Relación "Casa -> muchas Cuotas"
+        public virtual ICollection<Cuota> Cuotas { get; set; } = new List<Cuota>();
     }
-
 }

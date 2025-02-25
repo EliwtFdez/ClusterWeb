@@ -5,20 +5,18 @@ namespace ClusterWeb.DTOs
 {
     public class ResidenteCreateDto
     {
-        public int ResidenteId { get; set; }
+        public int IdResidente { get; set; }
 
-        [Required, MaxLength(100)]
+        [Required, MaxLength(50)]
         public string Nombre { get; set; }
 
-        [Required, MaxLength(15)]
+        [Phone]
         public string Telefono { get; set; }
 
-        [Required, EmailAddress]
+        [EmailAddress]
         public string Email { get; set; }
 
-        public DateTime FechaIngreso { get; set; }
-        public DateTime FechaRegistro { get; set; }
-        public int CasaId { get; set; } 
-
+        [Required]
+        public int IdCasa { get; set; } 
     }
 }

@@ -7,11 +7,20 @@ namespace ClusterWeb.Entities
     public class Pago
     {
         [Key]
-        public int PagoId { get; set; }
-        
-        // Relación con Deuda (con la cual se puede acceder al Residente)
-        public int DeudaId { get; set; }
+        public int IdPago { get; set; }
 
+        [Required]
+        public int IdCasa { get; set; }
+        public virtual Casa Casa { get; set; }
+
+        public int? IdResidente { get; set; }
+        public virtual Residente Residente { get; set; }
+
+        [Required]
+        public int IdCuota { get; set; }
+        public virtual Cuota Cuota { get; set; }
+
+        [Required]
         [Column(TypeName = "decimal(10,2)")]
         [Range(0.01, double.MaxValue)]
         public decimal MontoPagado { get; set; }
@@ -21,7 +30,6 @@ namespace ClusterWeb.Entities
         [Required]
         public MetodoPago MetodoPago { get; set; }
 
-        // Navegación
-        public virtual Deuda Deuda { get; set; }
+        public string Observaciones { get; set; }
     }
 }

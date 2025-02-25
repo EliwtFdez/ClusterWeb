@@ -28,13 +28,13 @@ namespace ClusterWeb.Controllers
         public async Task<IActionResult> GetPagos()
         {
             var pagos = await _context.Pagos
-                .Include(p => p.Deuda)
+                .Include(p => p.Cuota)
                 .ToListAsync();
 
             var pagoDtos = pagos.Select(p => new PagoDto
             {
-                PagoId = p.PagoId,
-                DeudaId = p.DeudaId,
+                IdPago = p.IdPago,
+                IdCuota = p.IdCuota,
                 MontoPagado = p.MontoPagado,
                 FechaPago = p.FechaPago,
                 MetodoPago = p.MetodoPago,
@@ -52,8 +52,8 @@ namespace ClusterWeb.Controllers
         public async Task<IActionResult> GetPagoById(int id)
         {
             var pago = await _context.Pagos
-                .Include(p => p.Deuda)
-                .FirstOrDefaultAsync(p => p.PagoId == id);
+                .Include(p => p.Cuota)
+                .FirstOrDefaultAsync(p => p.IdPago == id);
             if (pago == null)
             {
                 return NotFound(new { mensaje = "Pago no encontrado" });
@@ -61,8 +61,8 @@ namespace ClusterWeb.Controllers
 
             var pagoDto = new PagoDto
             {
-                PagoId = pago.PagoId,
-                DeudaId = pago.DeudaId,
+                IdPago = pago.IdPago,
+                IdCuota = pago.IdCuota,
                 MontoPagado = pago.MontoPagado,
                 FechaPago = pago.FechaPago,
                 MetodoPago = pago.MetodoPago,
@@ -82,13 +82,13 @@ namespace ClusterWeb.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var deudaExiste = await _context.Deudas.AnyAsync(d => d.DeudaId == pagoCreateDto.DeudaId);
+            var deudaExiste = await _context.Cuotas.AnyAsync(d => d.IdCuota == pagoCreateDto.IdCuota);
             if (!deudaExiste)
                 return NotFound(new { mensaje = "Deuda no encontrada" });
 
             var pago = new Pago
             {
-                DeudaId = pagoCreateDto.DeudaId,
+                IdCuota = pagoCreateDto.IdCuota,
                 MontoPagado = pagoCreateDto.MontoPagado,
                 FechaPago = pagoCreateDto.FechaPago,
                 MetodoPago = pagoCreateDto.MetodoPago,
@@ -99,14 +99,14 @@ namespace ClusterWeb.Controllers
 
             var pagoDto = new PagoDto
             {
-                PagoId = pago.PagoId,
-                DeudaId = pago.DeudaId,
+                IdPago = pago.IdPago,
+                IdCuota = pago.IdCuota,
                 MontoPagado = pago.MontoPagado,
                 FechaPago = pago.FechaPago,
                 MetodoPago = pago.MetodoPago,
             };
 
-            return CreatedAtAction(nameof(GetPagoById), new { id = pago.PagoId }, pagoDto);
+            return CreatedAtAction(nameof(GetPagoById), new { id = pago.IdPago }, pagoDto);
         }
 
         /// <summary>
@@ -129,11 +129,11 @@ namespace ClusterWeb.Controllers
                 return NotFound(new { mensaje = "Pago no encontrado" });
             }
 
-            var deudaExiste = await _context.Deudas.AnyAsync(d => d.DeudaId == pagoUpdateDto.DeudaId);
+            var deudaExiste = await _context.Cuotas.AnyAsync(d => d.IdCuota == pagoUpdateDto.IdCuota);
             if (!deudaExiste)
                 return NotFound(new { mensaje = "Deuda no encontrada" });
 
-            pago.DeudaId = pagoUpdateDto.DeudaId;
+            pago.IdCuota = pagoUpdateDto.IdCuota;
             pago.MontoPagado = pagoUpdateDto.MontoPagado;
             pago.FechaPago = pagoUpdateDto.FechaPago;
             pago.MetodoPago = pagoUpdateDto.MetodoPago;
@@ -176,7 +176,7 @@ namespace ClusterWeb.Controllers
 
         private bool PagoExists(int id)
         {
-            return _context.Pagos.Any(e => e.PagoId == id);
+            return _context.Pagos.Any(e => e.IdPago == id);
         }
     }
 }

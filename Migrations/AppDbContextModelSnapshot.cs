@@ -24,54 +24,41 @@ namespace ClusterWeb.Migrations
 
             modelBuilder.Entity("ClusterWeb.Entities.Casa", b =>
                 {
-                    b.Property<int>("CasaId")
+                    b.Property<int>("IdCasa")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CasaId"));
-
-                    b.Property<int>("Banos")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCasa"));
 
                     b.Property<string>("Direccion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("FechaRegistro")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<int>("Habitaciones")
-                        .HasColumnType("int");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("NumeroCasa")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
-                    b.HasKey("CasaId");
+                    b.HasKey("IdCasa");
 
-                    b.HasIndex("Direccion")
-                        .HasDatabaseName("idx_direccion");
+                    b.HasIndex("NumeroCasa")
+                        .IsUnique()
+                        .HasDatabaseName("idx_numero_casa");
 
                     b.ToTable("Casas");
                 });
 
-            modelBuilder.Entity("ClusterWeb.Entities.Deuda", b =>
+            modelBuilder.Entity("ClusterWeb.Entities.Cuota", b =>
                 {
-                    b.Property<int>("DeudaId")
+                    b.Property<int>("IdCuota")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DeudaId"));
-
-                    b.Property<int>("CasaId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCuota"));
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Estado")
                         .IsRequired()
@@ -82,44 +69,54 @@ namespace ClusterWeb.Migrations
                     b.Property<DateTime>("FechaRegistro")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<DateTime>("FechaVencimiento")
+                    b.Property<DateTime?>("FechaVencimiento")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("IdCasa")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdResidente")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("Monto")
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<int>("ResidenteId")
-                        .HasColumnType("int");
+                    b.Property<string>("NombreCuota")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("SaldoPendiente")
-                        .HasColumnType("decimal(10,2)");
+                    b.HasKey("IdCuota");
 
-                    b.HasKey("DeudaId");
+                    b.HasIndex("IdCasa");
 
-                    b.HasIndex("CasaId");
+                    b.HasIndex("IdResidente");
 
-                    b.HasIndex("ResidenteId");
-
-                    b.ToTable("Deudas");
+                    b.ToTable("Cuotas");
                 });
 
             modelBuilder.Entity("ClusterWeb.Entities.Pago", b =>
                 {
-                    b.Property<int>("PagoId")
+                    b.Property<int>("IdPago")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PagoId"));
-
-                    b.Property<int>("DeudaId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPago"));
 
                     b.Property<DateTime>("FechaPago")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("IdCasa")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdCuota")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("IdResidente")
+                        .HasColumnType("int");
 
                     b.Property<string>("MetodoPago")
                         .IsRequired()
@@ -128,72 +125,68 @@ namespace ClusterWeb.Migrations
                     b.Property<decimal>("MontoPagado")
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<int?>("ResidenteId")
-                        .HasColumnType("int");
+                    b.Property<string>("Observaciones")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("PagoId");
+                    b.HasKey("IdPago");
 
-                    b.HasIndex("DeudaId");
+                    b.HasIndex("IdCasa");
 
-                    b.HasIndex("ResidenteId");
+                    b.HasIndex("IdCuota");
+
+                    b.HasIndex("IdResidente");
 
                     b.ToTable("Pagos");
                 });
 
             modelBuilder.Entity("ClusterWeb.Entities.Residente", b =>
                 {
-                    b.Property<int>("ResidenteId")
+                    b.Property<int>("IdResidente")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ResidenteId"));
-
-                    b.Property<int>("CasaId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdResidente"));
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("FechaIngreso")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaRegistro")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                    b.Property<int>("IdCasa")
+                        .HasColumnType("int");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Telefono")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ResidenteId");
+                    b.HasKey("IdResidente");
 
-                    b.HasIndex("CasaId");
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("idx_email");
 
-                    b.HasIndex("Nombre")
-                        .HasDatabaseName("idx_nombre");
+                    b.HasIndex("IdCasa");
 
                     b.ToTable("Residentes");
                 });
 
-            modelBuilder.Entity("ClusterWeb.Entities.Deuda", b =>
+            modelBuilder.Entity("ClusterWeb.Entities.Cuota", b =>
                 {
                     b.HasOne("ClusterWeb.Entities.Casa", "Casa")
-                        .WithMany("Deudas")
-                        .HasForeignKey("CasaId")
+                        .WithMany("Cuotas")
+                        .HasForeignKey("IdCasa")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ClusterWeb.Entities.Residente", "Residente")
-                        .WithMany("Deudas")
-                        .HasForeignKey("ResidenteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithMany("Cuotas")
+                        .HasForeignKey("IdResidente")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Casa");
@@ -203,25 +196,36 @@ namespace ClusterWeb.Migrations
 
             modelBuilder.Entity("ClusterWeb.Entities.Pago", b =>
                 {
-                    b.HasOne("ClusterWeb.Entities.Deuda", "Deuda")
+                    b.HasOne("ClusterWeb.Entities.Casa", "Casa")
                         .WithMany()
-                        .HasForeignKey("DeudaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("IdCasa")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("ClusterWeb.Entities.Residente", null)
-                        .WithMany("Pagos")
-                        .HasForeignKey("ResidenteId");
+                    b.HasOne("ClusterWeb.Entities.Cuota", "Cuota")
+                        .WithMany()
+                        .HasForeignKey("IdCuota")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("Deuda");
+                    b.HasOne("ClusterWeb.Entities.Residente", "Residente")
+                        .WithMany("Pagos")
+                        .HasForeignKey("IdResidente")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Casa");
+
+                    b.Navigation("Cuota");
+
+                    b.Navigation("Residente");
                 });
 
             modelBuilder.Entity("ClusterWeb.Entities.Residente", b =>
                 {
                     b.HasOne("ClusterWeb.Entities.Casa", "Casa")
                         .WithMany("Residentes")
-                        .HasForeignKey("CasaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("IdCasa")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Casa");
@@ -229,14 +233,14 @@ namespace ClusterWeb.Migrations
 
             modelBuilder.Entity("ClusterWeb.Entities.Casa", b =>
                 {
-                    b.Navigation("Deudas");
+                    b.Navigation("Cuotas");
 
                     b.Navigation("Residentes");
                 });
 
             modelBuilder.Entity("ClusterWeb.Entities.Residente", b =>
                 {
-                    b.Navigation("Deudas");
+                    b.Navigation("Cuotas");
 
                     b.Navigation("Pagos");
                 });

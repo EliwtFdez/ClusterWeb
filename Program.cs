@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
+using System.Reflection;
 using ClusterWeb.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 
 namespace ClusterWeb
 {
@@ -16,28 +16,56 @@ namespace ClusterWeb
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
-            // Agregar controladores con conversor global para enums a cadena
+            // Configurar CORS para permitir cualquier origen
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("PermitirTodos", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
+
+            // Agregar controladores con conversión de enums a cadena
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
-            // Configurar Swagger y Endpoints
+            // Configurar Swagger con comentarios XML
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
+                if (File.Exists(xmlPath))
+                {
+                    c.IncludeXmlComments(xmlPath);
+                }
             });
 
             var app = builder.Build();
 
-            // Aplicar migraciones automáticamente (útil en desarrollo)
+            // Aplicar migraciones automáticamente con control de errores
             using (var scope = app.Services.CreateScope())
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                dbContext.Database.Migrate();
+                try
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    dbContext.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error en la migración de la base de datos: {ex.Message}");
+                }
+            }
+
+            // Manejo de errores global en producción
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/error");
+                app.UseHsts();
             }
 
             // Configurar Swagger solo en desarrollo
@@ -48,6 +76,7 @@ namespace ClusterWeb
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("PermitirTodos"); // Aplicar CORS
             app.UseAuthorization();
             app.MapControllers();
             app.Run();

@@ -7,26 +7,25 @@ namespace ClusterWeb.Entities
     public class Residente
     {
         [Key]
-        public int ResidenteId { get; set; }
+        public int IdResidente { get; set; }
 
-        [Required, MaxLength(100)]
+        [Required]
+        [MaxLength(50)]
         public string Nombre { get; set; }
 
-        [Required, Phone]
+        [Phone]
         public string Telefono { get; set; }
 
-        [Required, EmailAddress]
+        [EmailAddress]
         public string Email { get; set; }
 
-        public DateTime FechaIngreso { get; set; }
-        public DateTime FechaRegistro { get; set; } = DateTime.Now;
-
         // Relación con Casa
-        public int CasaId { get; set; }
+        [Required]
+        public int IdCasa { get; set; }
         public virtual Casa Casa { get; set; }
 
         // Relaciones
-        public virtual ICollection<Deuda> Deudas { get; set; } = new List<Deuda>();
+        public virtual ICollection<Cuota> Cuotas { get; set; } = new List<Cuota>();
         public virtual ICollection<Pago> Pagos { get; set; } = new List<Pago>();
     }
 }

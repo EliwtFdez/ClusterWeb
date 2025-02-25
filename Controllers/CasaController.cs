@@ -18,96 +18,122 @@ namespace ClusterWeb.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Obtiene todas las casas con sus residentes
-        /// </summary>
-        /// <returns>Lista de casas con información de residentes</returns>
         [HttpGet]
         [Description("Obtiene todas las casas con sus residentes")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<CasaCreateDto>>> GetCasas()
         {
-            var casas = await _context.Casas
-                                    .Include(c => c.Residentes)
-                                    .ToListAsync();
-
-            var casasDto = casas.Select(c => new CasaCreateDto
-            {
-                Direccion = c.Direccion,
-                NumeroCasa = c.NumeroCasa,
-                Habitaciones = c.Habitaciones,
-                Banos = c.Banos,
-                FechaRegistro = c.FechaRegistro,
-                Residentes = c.Residentes.Select(r => new ResidenteCreateDto 
+            var casasDto = await _context.Casas
+                .Include(c => c.Residentes)
+                .Include(c => c.Cuotas)
+                .Select(c => new CasaCreateDto
                 {
-                    ResidenteId = r.ResidenteId,
-                    Nombre = r.Nombre,
-                    Telefono = r.Telefono,
-                    Email = r.Email,
-                    FechaIngreso = r.FechaIngreso,
-                    FechaRegistro = r.FechaRegistro
-                }).ToList()
-            }).ToList();
+                    IdCasa = c.IdCasa,
+                    Direccion = c.Direccion,
+                    NumeroCasa = c.NumeroCasa,
+                    Residentes = c.Residentes.Select(r => new ResidenteCreateDto
+                    {
+                        IdResidente = r.IdResidente,
+                        Nombre = r.Nombre,
+                        Telefono = r.Telefono,
+                        Email = r.Email
+                    }).ToList(),
+                    Cuotas = c.Cuotas.Select(q => new CuotaCreateDto
+                    {
+                        NombreCuota = q.NombreCuota,
+                        Monto = q.Monto,
+                        FechaVencimiento = q.FechaVencimiento,
+                        Descripcion = q.Descripcion,
+                        Estado = q.Estado.ToString(),
+                        IdResidente = q.IdResidente
+                    }).ToList()
+                }).ToListAsync();
 
             return Ok(casasDto);
         }
 
-        /// <summary>
-        /// Obtiene una casa específica por su ID
-        /// </summary>
-        /// <param name="id">ID de la casa</param>
-        /// <returns>Información detallada de la casa</returns>
         [HttpGet("{id}")]
         [Description("Obtiene una casa específica por su ID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Casa>> GetCasa(int id)
+        public async Task<ActionResult<CasaCreateDto>> GetCasa(int id)
         {
             var casa = await _context.Casas
-                                     .Include(c => c.Residentes)
-                                     .FirstOrDefaultAsync(c => c.CasaId == id);
+                .Include(c => c.Residentes)
+                .Include(c => c.Cuotas)
+                .FirstOrDefaultAsync(c => c.IdCasa == id);
 
             if (casa == null)
                 return NotFound(new { mensaje = "Casa no encontrada" });
 
-            return casa;
+            var casaDto = new CasaCreateDto
+            {
+                IdCasa = casa.IdCasa,
+                Direccion = casa.Direccion,
+                NumeroCasa = casa.NumeroCasa,
+                Residentes = casa.Residentes.Select(r => new ResidenteCreateDto
+                {
+                    IdResidente = r.IdResidente,
+                    Nombre = r.Nombre,
+                    Telefono = r.Telefono,
+                    Email = r.Email
+                }).ToList(),
+                Cuotas = casa.Cuotas.Select(q => new CuotaCreateDto
+                {
+                    NombreCuota = q.NombreCuota,
+                    Monto = q.Monto,
+                    FechaVencimiento = q.FechaVencimiento,
+                    Descripcion = q.Descripcion,
+                    Estado = q.Estado.ToString(),
+                    IdResidente = q.IdResidente
+                }).ToList()
+            };
+
+            return Ok(casaDto);
         }
 
-        /// <summary>
-        /// Crea una nueva casa
-        /// </summary>
-        /// <param name="casaDto">Datos de la casa a crear</param>
-        /// <returns>Casa creada</returns>
         [HttpPost]
         [Description("Crea una nueva casa")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Casa>> CreateCasa([FromBody] CasaCreateDto casaDto)
+        public async Task<ActionResult<CasaCreateDto>> CreateCasa([FromBody] CasaCreateDto casaDto)
         {
             if (!ModelState.IsValid)
-              return BadRequest(ModelState);
+                return BadRequest(ModelState);
 
             var casa = new Casa
             {
                 Direccion = casaDto.Direccion,
                 NumeroCasa = casaDto.NumeroCasa,
-                Habitaciones = casaDto.Habitaciones,
-                Banos = casaDto.Banos,
-                FechaRegistro = DateTime.Now
+                Residentes = casaDto.Residentes.Select(r => new Residente
+                {
+                    Nombre = r.Nombre,
+                    Telefono = r.Telefono,
+                    Email = r.Email
+                }).ToList(),
+                Cuotas = casaDto.Cuotas.Select(q =>
+                {
+                    var estadoDeuda = Enum.TryParse<EstadoDeuda>(q.Estado, out var parsedEstado)
+                        ? parsedEstado
+                        : EstadoDeuda.Pendiente;
+                    return new Cuota
+                    {
+                        NombreCuota = q.NombreCuota,
+                        Monto = q.Monto,
+                        FechaVencimiento = q.FechaVencimiento,
+                        Descripcion = q.Descripcion,
+                        Estado = estadoDeuda,
+                        IdResidente = q.IdResidente
+                    };
+                }).ToList()
             };
 
             _context.Casas.Add(casa);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetCasa), new { id = casa.CasaId }, casa);
+            return CreatedAtAction(nameof(GetCasa), new { id = casa.IdCasa }, casaDto);
         }
 
-        /// <summary>
-        /// Actualiza los datos de una casa existente
-        /// </summary>
-        /// <param name="id">ID de la casa a actualizar</param>
-        /// <param name="casaDto">Nuevos datos de la casa</param>
-        /// <returns>No content si la actualización es exitosa</returns>
         [HttpPut("{id}")]
         [Description("Actualiza los datos de una casa existente")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -115,15 +141,51 @@ namespace ClusterWeb.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateCasa(int id, [FromBody] CasaCreateDto casaDto)
         {
-            var casa = await _context.Casas.FindAsync(id);
-            
+            var casa = await _context.Casas
+                .Include(c => c.Residentes)
+                .Include(c => c.Cuotas)
+                .FirstOrDefaultAsync(c => c.IdCasa == id);
+
             if (casa == null)
                 return NotFound(new { mensaje = "Casa no encontrada" });
 
-            casa.Direccion = casaDto.Direccion;
-            casa.NumeroCasa = casaDto.NumeroCasa;
-            casa.Habitaciones = casaDto.Habitaciones;
-            casa.Banos = casaDto.Banos;
+            casa.Direccion = casaDto.Direccion ?? casa.Direccion;
+            casa.NumeroCasa = casaDto.NumeroCasa ?? casa.NumeroCasa;
+
+            if (casaDto.Residentes != null)
+            {
+                casa.Residentes.Clear();
+                foreach (var residente in casaDto.Residentes)
+                {
+                    casa.Residentes.Add(new Residente
+                    {
+                        Nombre = residente.Nombre,
+                        Telefono = residente.Telefono,
+                        Email = residente.Email
+                    });
+                }
+            }
+
+            if (casaDto.Cuotas != null)
+            {
+                casa.Cuotas.Clear();
+                foreach (var cuota in casaDto.Cuotas)
+                {
+                    var estadoDeuda = Enum.TryParse<EstadoDeuda>(cuota.Estado, out var parsedEstado)
+                        ? parsedEstado
+                        : EstadoDeuda.Pendiente;
+
+                    casa.Cuotas.Add(new Cuota
+                    {
+                        NombreCuota = cuota.NombreCuota,
+                        Monto = cuota.Monto,
+                        FechaVencimiento = cuota.FechaVencimiento,
+                        Descripcion = cuota.Descripcion,
+                        Estado = estadoDeuda,
+                        IdResidente = cuota.IdResidente
+                    });
+                }
+            }
 
             _context.Entry(casa).State = EntityState.Modified;
 
@@ -139,11 +201,6 @@ namespace ClusterWeb.Controllers
             return NoContent();
         }
 
-        /// <summary>
-        /// Elimina una casa por su ID
-        /// </summary>
-        /// <param name="id">ID de la casa a eliminar</param>
-        /// <returns>No content si la eliminación es exitosa</returns>
         [HttpDelete("{id}")]
         [Description("Elimina una casa por su ID")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -158,6 +215,16 @@ namespace ClusterWeb.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpGet("debug")]
+        public async Task<ActionResult<IEnumerable<Casa>>> GetCasasDebug()
+        {
+            var casas = await _context.Casas
+                .Include(c => c.Residentes)
+                .Include(c => c.Cuotas)
+                .ToListAsync();
+            return Ok(casas);
         }
     }
 }
