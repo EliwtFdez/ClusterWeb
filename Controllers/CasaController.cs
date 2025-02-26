@@ -205,17 +205,27 @@ namespace ClusterWeb.Controllers
         [Description("Elimina una casa por su ID")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteCasa(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest(new { mensaje = "El ID proporcionado no es válido." });
+            }
+
             var casa = await _context.Casas.FindAsync(id);
             if (casa == null)
-                return NotFound(new { mensaje = "Casa no encontrada" });
+            {
+                return NotFound(new { mensaje = "Casa no encontrada." });
+            }
 
             _context.Casas.Remove(casa);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
+
+
 
         [HttpGet("debug")]
         public async Task<ActionResult<IEnumerable<Casa>>> GetCasasDebug()

@@ -17,26 +17,28 @@ namespace ClusterWeb.Controllers
             _context = context;
         }
 
+        // GET: api/Cuotas
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CuotaDto>>> GetCuotas()
         {
             var cuotas = await _context.Cuotas
                 .Select(c => new CuotaDto
                 {
-                    IdCuota = c.IdCuota,
-                    IdResidente = c.IdResidente,
-                    IdCasa = c.IdCasa,
+                    NombreCuota = c.NombreCuota,
                     Monto = c.Monto,
                     FechaVencimiento = c.FechaVencimiento,
-                    Estado = c.Estado.ToString(),
                     Descripcion = c.Descripcion,
-                    FechaRegistro = c.FechaRegistro
+                    Estado = c.Estado.ToString(),
+                    FechaRegistro = c.FechaRegistro,
+                    IdCasa = c.IdCasa,
+                    IdResidente = c.IdResidente
                 })
                 .ToListAsync();
 
             return Ok(cuotas);
         }
 
+        // GET: api/Cuotas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<CuotaDto>> GetCuota(int id)
         {
@@ -47,19 +49,20 @@ namespace ClusterWeb.Controllers
 
             var cuotaDto = new CuotaDto
             {
-                IdCuota = cuota.IdCuota,
-                IdResidente = cuota.IdResidente,
-                IdCasa = cuota.IdCasa,
+                NombreCuota = cuota.NombreCuota,
                 Monto = cuota.Monto,
                 FechaVencimiento = cuota.FechaVencimiento,
-                Estado = cuota.Estado.ToString(),
                 Descripcion = cuota.Descripcion,
-                FechaRegistro = cuota.FechaRegistro
+                Estado = cuota.Estado.ToString(),
+                FechaRegistro = cuota.FechaRegistro,
+                IdCasa = cuota.IdCasa,
+                IdResidente = cuota.IdResidente
             };
 
             return Ok(cuotaDto);
         }
 
+        // POST: api/Cuotas
         [HttpPost]
         public async Task<ActionResult<CuotaDto>> CreateCuota([FromBody] CuotaCreateDto cuotaDto)
         {
@@ -74,18 +77,12 @@ namespace ClusterWeb.Controllers
             if (!casaExiste)
                 return NotFound(new { mensaje = "Casa no encontrada" });
 
-            EstadoDeuda estadoEnum;
-            try
-            {
-                estadoEnum = Enum.Parse<EstadoDeuda>(cuotaDto.Estado, ignoreCase: true);
-            }
-            catch (Exception)
-            {
+            if (!Enum.TryParse<EstadoDeuda>(cuotaDto.Estado, ignoreCase: true, out var estadoEnum))
                 return BadRequest(new { mensaje = "Estado no válido" });
-            }
 
             var cuota = new Cuota
             {
+                NombreCuota = cuotaDto.NombreCuota,
                 IdResidente = cuotaDto.IdResidente,
                 IdCasa = cuotaDto.IdCasa,
                 Monto = cuotaDto.Monto,
@@ -101,18 +98,20 @@ namespace ClusterWeb.Controllers
             var resultDto = new CuotaDto
             {
                 IdCuota = cuota.IdCuota,
-                IdResidente = cuota.IdResidente,
-                IdCasa = cuota.IdCasa,
+                NombreCuota = cuota.NombreCuota,
                 Monto = cuota.Monto,
                 FechaVencimiento = cuota.FechaVencimiento,
-                Estado = cuota.Estado.ToString(),
                 Descripcion = cuota.Descripcion,
-                FechaRegistro = cuota.FechaRegistro
+                Estado = cuota.Estado.ToString(),
+                FechaRegistro = cuota.FechaRegistro,
+                IdCasa = cuota.IdCasa,
+                IdResidente = cuota.IdResidente
             };
 
             return CreatedAtAction(nameof(GetCuota), new { id = cuota.IdCuota }, resultDto);
         }
 
+        // PUT: api/Cuotas/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCuota(int id, [FromBody] CuotaUpdateDto cuotaDto)
         {
@@ -133,12 +132,14 @@ namespace ClusterWeb.Controllers
                 return BadRequest(new { mensaje = "Estado no válido" });
             }
 
+            cuota.NombreCuota = cuotaDto.NombreCuota;
             cuota.IdResidente = cuotaDto.IdResidente;
             cuota.IdCasa = cuotaDto.IdCasa;
             cuota.Monto = cuotaDto.Monto;
             cuota.FechaVencimiento = cuotaDto.FechaVencimiento;
             cuota.Estado = estadoEnum;
             cuota.Descripcion = cuotaDto.Descripcion;
+            // FechaRegistro generalmente no se modifica en una actualización
 
             try
             {
@@ -155,6 +156,7 @@ namespace ClusterWeb.Controllers
             return NoContent();
         }
 
+        // DELETE: api/Cuotas/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCuota(int id)
         {
